@@ -1,0 +1,10 @@
+FROM node:18-alpine
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --production   # ✅ ติดตั้งใน Linux (container)
+
+COPY . .
+RUN mkdir -p uploads
+EXPOSE 4000
+CMD ["node", "server.js"]

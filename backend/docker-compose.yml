@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: food-backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads  # ให้ container เขียนรูปได้จริง
+    restart: unless-stopped
