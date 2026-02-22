@@ -1,12 +1,18 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import './LoginPopup.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../context/StoreContext'
 import axios from "axios"
 
-const LoginPopup = ({setShowLogin}) => {
+const LoginPopup = () => {
 
-    const {url,setToken} = useContext(StoreContext)
+    const {url,setToken,setShowLogin} = useContext(StoreContext)
+
+    useEffect(()=>{
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = originalOverflow; }
+    },[])
 
     const [currState,setCurrState] = useState("Login")
     const [data,setData] = useState({

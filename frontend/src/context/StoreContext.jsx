@@ -9,6 +9,7 @@ const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const [food_list, setFoodList] = useState([]);
   const [token, setToken] = useState("");
+  const [showLogin, setShowLogin] = useState(false);
   const url = "https://e-commerce-c61q.onrender.com";
 
   const addToCart = async (itemId) => {
@@ -87,6 +88,8 @@ const StoreContextProvider = (props) => {
     url,
     token,
     setToken,
+    showLogin,
+    setShowLogin,
   };
 
   return (
