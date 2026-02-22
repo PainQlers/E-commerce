@@ -1,7 +1,8 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../context/StoreContext'
+import PropTypes from "prop-types";
 
 export const FoodItem = ({id,name,price,description,image}) => {
 
@@ -11,7 +12,7 @@ export const FoodItem = ({id,name,price,description,image}) => {
     <div className='food-item'>
         <div className="food-item-img-container">
             <img className='food-item-image' src={url+"/images/"+image} alt="" />
-            {!cartItems[id]
+            {!cartItems?.[id]
                 ?<img className='add' onClick={()=>addToCart(id)} src={assets.add_icon_white} alt="" />
                 :<div className='food-item-counter'>
                     <img onClick={()=>removeFromCart(id)} src={assets.remove_icon_red} alt="" />
@@ -33,5 +34,13 @@ export const FoodItem = ({id,name,price,description,image}) => {
     </div>
   )
 }
+
+FoodItem.propTypes = {
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    description: PropTypes.string,
+    image: PropTypes.string,
+  };
 
 export default FoodItem

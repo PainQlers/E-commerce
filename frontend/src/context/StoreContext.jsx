@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 export const StoreContext = createContext(null);
+import PropTypes from "prop-types";
 // import foodSchema from '../../../backend/models/foodModel.js'
 
 const StoreContextProvider = (props) => {
@@ -8,12 +9,12 @@ const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const [food_list, setFoodList] = useState([]);
   const [token, setToken] = useState("");
-  const url = "http://localhost:4000";
+  const url = "https://e-commerce-c61q.onrender.com";
 
   const addToCart = async (itemId) => {
     console.log();
 
-    if (!cartItems[itemId]) {
+    if (!cartItems?.[itemId]) {
       setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
     } else {
       setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
@@ -92,7 +93,11 @@ const StoreContextProvider = (props) => {
     <StoreContext.Provider value={contextValue}>
       {props.children}
     </StoreContext.Provider>
+    
   );
+};
+StoreContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default StoreContextProvider;
