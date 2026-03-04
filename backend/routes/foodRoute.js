@@ -1,6 +1,8 @@
 import express from "express"
 import { addFood,listFood,removeFood} from "../controllers/foodController.js"
 import multer from "multer"
+import { GridFsStorage } from "multer-gridfs-storage";
+import 'dotenv/config'
 
 const foodRouter = express.Router();
 
@@ -13,7 +15,17 @@ const foodRouter = express.Router();
 //     }
 // })
 
-const storage = multer.memoryStorage()
+// const storage = multer.memoryStorage()
+
+const storage = new GridFsStorage({
+    url: process.env.DB_URL,
+    file: (req, file) => {
+      return {
+        bucketName: "uploads",
+        filename: Date.now() + "-" + file.originalname
+      };
+    }
+  });
 
 // const upload = multer({storage:storage})
 
