@@ -4,6 +4,10 @@ Production deploy checklist for CORS and env
 
    ALLOWED_ORIGINS=https://e-commerce-ubg6.vercel.app,https://e-commerce-c61q.onrender.com
 
+2) Set `FRONTEND_URL` to the public URL of your deployed frontend (used by Stripe redirect). Example:
+
+   FRONTEND_URL=https://e-commerce-ubg6.vercel.app
+
 2) Ensure other required env vars (DB_URL, JWT_SECRET, etc.) are set in the hosting dashboard.
 
 3) Redeploy / restart the service after updating env vars.
