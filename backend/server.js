@@ -17,24 +17,18 @@ const port = 4000
 app.use(express.json())
 app.use(express.urlencoded({ limit: "50mb" }))
 
-const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://e-commerce-ubg6.vercel.app",
-    "https://e-commerce-c61q.onrender.com"
-];
+// allowed origins can be configured via env var (comma-separated)
+const allowedOriginsEnv = process.env.ALLOWED_ORIGINS ||
+    "http://localhost:5173,http://localhost:3000,https://e-commerce-ubg6.vercel.app,https://e-commerce-c61q.onrender.com";
+const allowedOrigins = allowedOriginsEnv.split(",").map(s => s.trim()).filter(Boolean);
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true); // allow non-browser requests or same-origin
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error("CORS policy: This origin is not allowed."));
-        }
-    },
-    credentials: true
-}));
+  origin: true,
+  credentials: true
+}))
+
+// Also enable OPTIONS preflight for configured origins
+app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 
 // db connection
 connectDB();
