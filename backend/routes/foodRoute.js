@@ -29,7 +29,19 @@ const storage = new GridFsStorage({
 
 // const upload = multer({storage:storage})
 
-const upload = multer({ storage })
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(file.mimetype);
+        if (extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'));
+        }
+    }
+})
 
 foodRouter.post("/add",upload.single("image"),addFood)
 foodRouter.get("/list",listFood)

@@ -5,8 +5,12 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { assets } from "../../assets/assets";
 import axios from "axios";
+import PropTypes from 'prop-types'
 
 const Orders = ({ url }) => {
+  Orders.propTypes = {
+    url: PropTypes.string.isRequired
+  }
   const [orders, setOrders] = useState([]);
 
   const fetchAllOrders = async () => {

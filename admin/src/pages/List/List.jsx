@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react'
 import './List.css'
 import axios from "axios"
 import {toast} from "react-toastify"
+import PropTypes from 'prop-types'
 
 const List = ({url}) => {
-
+  List.propTypes = {
+    url: PropTypes.string.isRequired
+  }
 
   const [list,setList] = useState([]);
 

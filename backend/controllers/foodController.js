@@ -2,10 +2,15 @@ import foodModel from "../models/foodModel.js";
 import fs from 'fs'
 
 
-// add food item0
+// add food item
 const addFood = async (req,res) => {
+    
+    // Check if file was uploaded
+    if (!req.file) {
+        return res.json({success:false,message:"Please upload an image"})
+    }
 
-    let image_filename = `${req.file.filename}`;
+    let image_filename = req.file.filename;
 
     const food = new foodModel({
         name:req.body.name,
@@ -19,7 +24,7 @@ const addFood = async (req,res) => {
         res.json({success:true,message:"Food Added"})
     } catch (error) {
         console.log(error)
-        res.json({success:false,message:"Error"})
+        res.json({success:false,message:"Error adding food. Please check all fields are filled correctly."})
     }
 }
 
