@@ -4,7 +4,7 @@ import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 export const PlaceOrder = () => {
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
+  const { getTotalCartAmount, token, food_list, cartItems, url, promoCode, finalAmount } =
     useContext(StoreContext);
 
   const [data, setData] = useState({
@@ -39,6 +39,7 @@ export const PlaceOrder = () => {
       address: data,
       items: orderItems,
       amount: getTotalCartAmount() + 2,
+      promotionCode: promoCode || "",
     };
     let response = await axios.post(url + "/api/order/place", orderData, {
       headers: { token },

@@ -1,5 +1,5 @@
 import express from "express"
-import { addFood,listFood,removeFood} from "../controllers/foodController.js"
+import { addFood,listFood,removeFood,listFoodById,updateFood} from "../controllers/foodController.js"
 import multer from "multer"
 import { GridFsStorage } from "multer-gridfs-storage";
 import 'dotenv/config'
@@ -36,7 +36,8 @@ const upload = multer({
 foodRouter.post("/add",upload.single("image"),addFood)
 foodRouter.get("/list",listFood)
 foodRouter.post("/remove",removeFood);
-
+foodRouter.get("/listById",listFoodById);
+foodRouter.put("/edit",updateFood)
 
 
 
