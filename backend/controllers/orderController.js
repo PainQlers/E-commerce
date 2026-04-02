@@ -20,24 +20,46 @@ const frontend_url = process.env.FRONTEND_URL || "http://localhost:5173";
         console.log("Promotion code:", promotionCode);
 
         if (promotionCode) {
-            const promotion = await promotionModel.findOne({ 
-                code: promotionCode.toUpperCase(),
-                startDate: { $lte: new Date() },
-                endDate: { $gte: new Date() }
-            });
+            // Find promotion by code first, then validate dates and limits in JS
+            const promotion = await promotionModel.findOne({ code: promotionCode.toUpperCase() });
 
-            console.log("Promotion found:", promotion);
+            console.log("Promotion document for code lookup:", promotion);
 
             if (!promotion) {
-                return res.json({success:false,message:"Invalid or expired promotion code"});
+                return res.json({ success: false, message: "Invalid promotion code" });
+            }
+
+            // Validate start/end dates using whole-day boundaries (UTC)
+            const parsedStart = new Date(promotion.startDate);
+            const parsedEnd = new Date(promotion.endDate);
+            const startDateMs = Date.UTC(parsedStart.getUTCFullYear(), parsedStart.getUTCMonth(), parsedStart.getUTCDate(), 0, 0, 0, 0);
+            const endDateMs = Date.UTC(parsedEnd.getUTCFullYear(), parsedEnd.getUTCMonth(), parsedEnd.getUTCDate(), 23, 59, 59, 999);
+            console.log("Parsed promotion date boundaries (ms):", { startDateMs, endDateMs, rawStart: promotion.startDate, rawEnd: promotion.endDate });
+
+            if (isNaN(startDateMs) || isNaN(endDateMs)) {
+                return res.json({ success: false, message: "Invalid promotion date configuration" });
+            }
+
+            const now = Date.now();
+            console.log("Promotion date check (whole-day UTC):", {
+                now_iso: new Date(now).toISOString(),
+                start_iso: new Date(startDateMs).toISOString(),
+                end_iso: new Date(endDateMs).toISOString(),
+                now_ms: now,
+                start_ms: startDateMs,
+                end_ms: endDateMs
+            });
+
+            if (now < startDateMs || now > endDateMs) {
+                return res.json({ success: false, message: "Expired promotion code" });
             }
 
             if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
-                return res.json({success:false,message:"Promotion code usage limit exceeded"});
+                return res.json({ success: false, message: "Promotion code usage limit exceeded" });
             }
 
-            if (req.body.amount < promotion.minOrderAmount) {
-                return res.json({success:false,message:`Minimum order amount for this promotion is $${promotion.minOrderAmount}`});
+            if (req.body.amount < (promotion.minOrderAmount || 0)) {
+                return res.json({ success: false, message: `Minimum order amount for this promotion is $${promotion.minOrderAmount}` });
             }
 
             // Calculate discount
@@ -86,16 +108,57 @@ const frontend_url = process.env.FRONTEND_URL || "http://localhost:5173";
 
         await userModel.findByIdAndUpdate(req.body.userId,{cartData:{}});
 
-        const line_items = req.body.items.map((item)=>({
-            price_data:{
-                currency:"usd",
-                product_data:{
-                    name:item.name
+        // Build Stripe line items. If a promotion discount was applied, distribute
+        // the discount across items by scaling their unit prices so the final
+        // charged subtotal matches `originalSubtotal - discountAmount`.
+        const originalSubtotal = req.body.items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+        const discountedSubtotal = Math.max(0, originalSubtotal - discountAmount);
+
+        let line_items = [];
+
+        if (originalSubtotal > 0 && discountAmount > 0) {
+            const scale = discountedSubtotal / originalSubtotal;
+            // create scaled unit_amounts in cents
+            for (let i = 0; i < req.body.items.length; i++) {
+                const it = req.body.items[i];
+                const scaledUnitCents = Math.round(it.price * scale * 100);
+                line_items.push({
+                    price_data: {
+                        currency: "usd",
+                        product_data: { name: it.name },
+                        unit_amount: scaledUnitCents
+                    },
+                    quantity: it.quantity
+                });
+            }
+
+            // Reconcile rounding differences to ensure Stripe total equals expected
+            const expectedSubtotalCents = Math.round(discountedSubtotal * 100);
+            const actualSubtotalCents = line_items.reduce((s, li) => s + li.price_data.unit_amount * li.quantity, 0);
+            let diff = expectedSubtotalCents - actualSubtotalCents;
+            if (diff !== 0) {
+                // adjust first item's unit_amount to absorb the remainder
+                const first = line_items[0];
+                const adjustPerUnit = Math.round(diff / first.quantity);
+                first.price_data.unit_amount = Math.max(0, first.price_data.unit_amount + adjustPerUnit);
+                const newActual = line_items.reduce((s, li) => s + li.price_data.unit_amount * li.quantity, 0);
+                const remaining = expectedSubtotalCents - newActual;
+                if (remaining !== 0) {
+                    // apply any tiny leftover to first item again
+                    first.price_data.unit_amount = Math.max(0, first.price_data.unit_amount + remaining);
+                }
+            }
+        } else {
+            // no discount, use original prices
+            line_items = req.body.items.map((item) => ({
+                price_data: {
+                    currency: "usd",
+                    product_data: { name: item.name },
+                    unit_amount: Math.round(item.price * 100)
                 },
-                unit_amount:item.price*100
-            },
-            quantity:item.quantity
-        }))
+                quantity: item.quantity
+            }));
+        }
 
         // Adjust delivery fee for discount
         let deliveryFee = 2;
@@ -103,16 +166,18 @@ const frontend_url = process.env.FRONTEND_URL || "http://localhost:5173";
             deliveryFee = Math.max(0, 2 - discountAmount);
         }
 
-        line_items.push({
-            price_data:{
-                currency:"usd",
-                product_data:{
-                    name:"Delivery Charges"
+        if (deliveryFee > 0) {
+            line_items.push({
+                price_data:{
+                    currency:"usd",
+                    product_data:{
+                        name:"Delivery Charges"
+                    },
+                    unit_amount: Math.round(deliveryFee*100)
                 },
-                unit_amount:deliveryFee*100
-            },
-            quantity:1
-        })
+                quantity:1
+            })
+        }
 
         // No separate discount line item
 
@@ -146,14 +211,18 @@ const validatePromotion = async (req, res) => {
             return res.json({success:false,message:"Invalid promotion code"});
         }
 
-        const endDate = new Date(promotion.endDate).getTime();
+        // Use whole-day boundaries (UTC) for validatePromotion too
+        const pStart = new Date(promotion.startDate);
+        const pEnd = new Date(promotion.endDate);
+        const startBoundary = Date.UTC(pStart.getUTCFullYear(), pStart.getUTCMonth(), pStart.getUTCDate(), 0, 0, 0, 0);
+        const endBoundary = Date.UTC(pEnd.getUTCFullYear(), pEnd.getUTCMonth(), pEnd.getUTCDate(), 23, 59, 59, 999);
 
-        if (isNaN(endDate)) {
-            return res.json({ success: false, message: "Invalid end date" });
+        if (isNaN(startBoundary) || isNaN(endBoundary)) {
+            return res.json({ success: false, message: "Invalid promotion date configuration" });
         }
 
-        if(Date.now() > endDate ) {
-            return res.json({success:false,message:"Your promotion code is expired "});
+        if (Date.now() < startBoundary || Date.now() > endBoundary) {
+            return res.json({ success: false, message: "Your promotion code is expired " });
         }
 
         if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
