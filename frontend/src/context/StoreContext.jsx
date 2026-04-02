@@ -2,7 +2,6 @@ import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 export const StoreContext = createContext(null);
 import PropTypes from "prop-types";
-// import foodSchema from '../../../backend/models/foodModel.js'
 
 const StoreContextProvider = (props) => {
   // const {foodSchema,setFoodList} = useState([]);
@@ -14,6 +13,7 @@ const StoreContextProvider = (props) => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalAmount, setFinalAmount] = useState(0);
   const url = "https://e-commerce-c61q.onrender.com";
+  // const url = "http://localhost:4000";
 
   const addToCart = async (itemId) => {
     console.log();
@@ -72,7 +72,7 @@ const StoreContextProvider = (props) => {
 
   const applyPromoCode = async (code) => {
     try {
-      const orderAmount = getTotalCartAmount() + 2; // Include delivery fee
+      const orderAmount = getTotalCartAmount() ; // Include delivery fee
       const response = await axios.post(url + "/api/order/validate-promotion", {
         code,
         orderAmount
