@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { assets } from "../../assets/assets";
 import axios from "axios";
 import PropTypes from 'prop-types'
+import { ChevronDown } from 'lucide-react';
 
 const Orders = ({ url }) => {
   Orders.propTypes = {
@@ -73,14 +74,20 @@ const Orders = ({ url }) => {
             </div>
             <p>Items : {order.items.length}</p>
             <p>${order.amount}</p>
-            <select
+            <div className="relative">
+              <select
               onChange={(event) => statusHandler(event, order._id)}
               value={order.status}
+              className="appearance-none"
             >
               <option value="Food Processing">Food Processing</option>
               <option value="Out for delivery">Out for delivery</option>
               <option value="Delivered">Delivered</option>
             </select>
+              <div className="pointer-events-none absolute inset-y-0 right-7.5 flex items-center">
+                <ChevronDown size={16}/>
+              </div>
+            </div>
           </div>
         ))}
       </div>

@@ -80,16 +80,19 @@ const Add = ({url}) => {
             </div>
             <div className="add-product-name flex-col">
                 <p>Product name</p>
-                <input onChange={onChangeHandler} value={data.name} type="text" name='name' placeholder='Type here'/>
+                <input className='border border-gray-300 rounded-md'
+                onChange={onChangeHandler} value={data.name} type="text" name='name' placeholder='Type here'/>
             </div>
             <div className="add-product-description flex-col">
                 <p>Product description</p>
-                <textarea onChange={onChangeHandler} value={data.description} name="description" rows="6" placeholder='Write content here' required></textarea>
+                <textarea className='border border-gray-300 rounded-md'
+                onChange={onChangeHandler} value={data.description} name="description" rows="6" placeholder='Write content here' required></textarea>
             </div>
             <div className="add-category-price">
                 <div className="add-category flex-col">
                     <p>Product category</p>
-                    <select onChange={onChangeHandler} name="category">
+                    <select className='border border-gray-300 rounded-md'
+                    onChange={onChangeHandler} name="category">
                         <option value="Salad">Salad</option>
                         <option value="Rolls">Rolls</option>
                         <option value="Deserts">Deserts</option>
@@ -102,7 +105,8 @@ const Add = ({url}) => {
                 </div>
                 <div className="add-price flex-col">
                     <p>Product price</p>
-                    <input onChange={onChangeHandler} value={data.price} type="number" name='price' placeholder='$20' />
+                    <input className='border border-gray-300 rounded-md'
+                    onChange={onChangeHandler} value={data.price} type="number" name='price' placeholder='$20' />
                 </div>
             </div>
             <button type='submit' className='add-btn' disabled={loading}>{loading ? "Adding..." : "ADD"}</button>

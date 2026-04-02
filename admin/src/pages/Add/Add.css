@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 .add{
     width: 70%;
     margin-left: max(5vw,25px);

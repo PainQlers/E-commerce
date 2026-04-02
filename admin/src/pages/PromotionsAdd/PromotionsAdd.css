@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+.add-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.add-row .add-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.add-field p {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.add-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #ff6347;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

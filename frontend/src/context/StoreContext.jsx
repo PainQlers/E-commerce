@@ -10,6 +10,9 @@ const StoreContextProvider = (props) => {
   const [food_list, setFoodList] = useState([]);
   const [token, setToken] = useState("");
   const [showLogin, setShowLogin] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(0);
   const url = "https://e-commerce-c61q.onrender.com";
 
   const addToCart = async (itemId) => {
@@ -67,6 +70,33 @@ const StoreContextProvider = (props) => {
     setCartItems(response.data.cartData);
   };
 
+  const applyPromoCode = async (code) => {
+    try {
+      const orderAmount = getTotalCartAmount() + 2; // Include delivery fee
+      const response = await axios.post(url + "/api/order/validate-promotion", {
+        code,
+        orderAmount
+      });
+      
+      if (response.data.success) {
+        setPromoCode(code);
+        setDiscountAmount(response.data.discountAmount);
+        setFinalAmount(response.data.finalAmount);
+        return { success: true };
+      } else {
+        return { success: false, message: response.data.message };
+      }
+    } catch (error) {
+      return { success: false, message: "Error validating promotion code" };
+    }
+  };
+
+  const clearPromoCode = () => {
+    setPromoCode("");
+    setDiscountAmount(0);
+    setFinalAmount(0);
+  };
+
   useEffect(() => {
     async function loadData() {
       await fetchFoodList();
@@ -90,6 +120,12 @@ const StoreContextProvider = (props) => {
     setToken,
     showLogin,
     setShowLogin,
+    promoCode,
+    setPromoCode,
+    discountAmount,
+    finalAmount,
+    applyPromoCode,
+    clearPromoCode,
   };
 
   return (

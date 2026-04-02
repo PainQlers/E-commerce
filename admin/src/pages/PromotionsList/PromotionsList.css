@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+.promotions-list .list-table-format {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr 1fr 1fr 0.8fr 1.2fr 1.2fr minmax(80px, 0.75fr);
+  align-items: center;
+  gap: 10px;
+
+  border: 1px solid #cacaca;
+  font-size: 13px;
+  background: #fff;
+}
+
+.promotions-list .list-table-format.title {
+  background-color: #f9f9f9;
+  font-weight: 700;
+}
+
+.promotions-list .list-table-format b,
+.promotions-list .list-table-format p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promotions-list .list-table-format .actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  white-space: normal;
+}
+
+@media (max-width: 680px) {
+  .promotions-list .list-table-format {
+    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-auto-rows: auto;
+  }
+
+  .promotions-list .list-table-format b:nth-child(n+4),
+  .promotions-list .list-table-format p:nth-child(n+4) {
+    display: none;
+  }
+
+  .promotions-list .list-table-format b:last-child,
+  .promotions-list .list-table-format p:last-child {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

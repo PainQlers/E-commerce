@@ -3,6 +3,8 @@ import './List.css'
 import axios from "axios"
 import {toast} from "react-toastify"
 import PropTypes from 'prop-types'
+import { SquarePen, X } from 'lucide-react';
+import { NavLink } from 'react-router-dom'
 
 const List = ({url}) => {
   List.propTypes = {
@@ -35,11 +37,16 @@ const List = ({url}) => {
 
   useEffect(()=>{
     fetchList();
-  },[])
+  }, [])
 
   return (
     <div className='list add flex-col'>
-      <p>All Foods List</p>
+      <div className="list-header">
+        <p>All Foods List</p>
+        <NavLink to='/add'>
+          <p className="add-button bg-[#ff6347] text-orange-100 transition-transform duration-200 hover:scale-105">Add Items</p>
+        </NavLink>
+      </div>
       <div className="list-table">
         <div className="list-table-format">
           <b>Image</b>
@@ -55,7 +62,12 @@ const List = ({url}) => {
                 <p>{item.name}</p>
                 <p>{item.category}</p>
                 <p>${item.price}</p>
-                <p onClick={()=>removeFood(item._id)} className='cursor'>X</p>
+                <div className='flex gap-3'>
+                  <NavLink to ={`/edit/${item._id}`}>
+                    <SquarePen size={14} className='cursor'/>
+                  </NavLink>
+                  <p onClick={()=>removeFood(item._id)} className='cursor'><X size={14} /></p>
+                </div>
               </div>
             )
         })}
