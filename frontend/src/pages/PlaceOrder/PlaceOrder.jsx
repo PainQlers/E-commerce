@@ -4,7 +4,7 @@ import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 export const PlaceOrder = () => {
-  const { getTotalCartAmount, token, food_list, cartItems, url, promoCode, finalAmount } =
+  const { getTotalCartAmount, token, food_list, cartItems, url, promoCode, discountAmount, finalAmount } =
     useContext(StoreContext);
 
   const [data, setData] = useState({
@@ -35,10 +35,14 @@ export const PlaceOrder = () => {
         orderItems.push(itemInfo);
       }
     });
+    const subtotal = getTotalCartAmount();
+    const deliveryFee = subtotal === 0 ? 0 : (discountAmount > 0 ? Math.max(0, 2 - discountAmount) : 2);
+    const amountToSend = (promoCode ? finalAmount : subtotal) + deliveryFee;
+
     let orderData = {
       address: data,
       items: orderItems,
-      amount: getTotalCartAmount() + 2,
+      amount: amountToSend,
       promotionCode: promoCode || "",
     };
     let response = await axios.post(url + "/api/order/place", orderData, {
@@ -49,7 +53,7 @@ export const PlaceOrder = () => {
       const { session_url } = response.data;
       window.location.replace(session_url);
     } else {
-      alert("Error");
+      alert(`Error : ${response.data.message}`);
     }
   };
 
@@ -160,10 +164,19 @@ export const PlaceOrder = () => {
               <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
             </div>
             <hr />
+            {promoCode && (
+              <>
+                <div className="cart-total-details">
+                  <p>Discount ({promoCode})</p>
+                  <p>-${discountAmount}</p>
+                </div>
+                <hr />
+              </>
+            )}
             <div className="cart-total-details">
               <b>Total</b>
               <b>
-                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
+                ${getTotalCartAmount() === 0 ? 0 : ((promoCode ? finalAmount : getTotalCartAmount()) + (getTotalCartAmount() === 0 ? 0 : (discountAmount > 0 ? Math.max(0, 2 - discountAmount) : 2)))}
               </b>
             </div>
           </div>

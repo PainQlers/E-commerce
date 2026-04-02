@@ -12,8 +12,8 @@ const StoreContextProvider = (props) => {
   const [promoCode, setPromoCode] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalAmount, setFinalAmount] = useState(0);
-  const url = "https://e-commerce-c61q.onrender.com";
-  // const url = "http://localhost:4000";
+  // const url = "https://e-commerce-c61q.onrender.com";
+  const url = "http://localhost:4000";
 
   const addToCart = async (itemId) => {
     console.log();
