@@ -20,7 +20,7 @@
 
 - **Secure Checkout**: Fully integrated with Stripe for safe and reliable credit card transactions.
 
-### Admin Dashboard (Back-office)
+### Admin Dashboard
 - **Menu Management**: Complete CRUD functionality (Create, Read, Update, Delete) for food items and categories.
 
 - **Promotion Management**: Full control over marketing campaigns with the ability to manage promo codes and discount rates.
